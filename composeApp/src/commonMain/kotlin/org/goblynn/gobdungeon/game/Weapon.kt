@@ -1,0 +1,23 @@
+package org.goblynn.gobdungeon.game
+
+/**
+ * List of all weapons present in the game
+ *
+ * @param displayName Name to show to player
+ * @param damageBonusMin Minimum bonus damage
+ * @param damageBonusMax Maximum bonus damage
+ * @param attackMessageVerb What verb to use in the action log following `"p1 VERB p2 for N damage"` structure
+ */
+enum class Weapon(
+    val displayName: String,
+    val damageBonusMin: Int,
+    val damageBonusMax: Int,
+    val attackMessageVerb: String
+) {
+    /**
+     * "hidden" weapon that can be set as default for characters
+     */
+    FIST("Fist", damageBonusMin = 0, damageBonusMax = 1, attackMessageVerb = "hit"),
+    STINGER("Stinger", damageBonusMin = 0, damageBonusMax = 1, attackMessageVerb = "stung"),
+    DAGGER("Dagger", damageBonusMin = 2, damageBonusMax = 4, attackMessageVerb = "stabbed")
+}
