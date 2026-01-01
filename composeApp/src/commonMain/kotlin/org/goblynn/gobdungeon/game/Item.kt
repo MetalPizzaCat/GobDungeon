@@ -14,8 +14,9 @@ enum class Item(
     val displayName: String,
     val healthRestore: Int,
     val hungerRestore: Int,
-    val weapon: Weapon?
+    val weapon: Weapon?,
+    val effect: Map<Effect, Int>
 ) {
-    SMALL_RATION("Small ration", healthRestore = 5, hungerRestore = 30, weapon = null),
-    DAGGER("Dagger", healthRestore = 0, hungerRestore = 0, weapon = Weapon.DAGGER)
+    SMALL_RATION("Small ration", healthRestore = 5, hungerRestore = 30, weapon = null, emptyMap()),
+    DAGGER("Dagger", healthRestore = 0, hungerRestore = 0, weapon = Weapon.DAGGER, emptyMap())
 }

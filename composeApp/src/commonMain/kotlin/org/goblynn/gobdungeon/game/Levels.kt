@@ -5,8 +5,17 @@ enum class Levels(
     val distance: Int,
     val distanceIncrease: Float,
     val chanceOfEnemy: Float,
-    val endBoss: Character,
+    val chanceOfSkip: Float,
+    val endBosses: List<Character>,
     val enemies: List<Character>
 ) {
-    ENTRANCE("Entrance", 250, distanceIncrease = 1.5f, 0.1f, Character.BEE, listOf(Character.BEE))
+    ENTRANCE(
+        dungeonLevelName = "Entrance",
+        distance = 250,
+        distanceIncrease = 1.5f,
+        chanceOfEnemy = 0.1f,
+        chanceOfSkip = 0.1f,
+        endBosses = listOf(Character.SUPER_BEE),
+        enemies = listOf(Character.BEE)
+    )
 }

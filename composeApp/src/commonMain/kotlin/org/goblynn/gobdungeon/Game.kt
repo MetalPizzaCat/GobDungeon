@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
@@ -13,6 +14,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -21,7 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.goblynn.gobdungeon.game.Fighter
 import org.goblynn.gobdungeon.game.GameState
-import java.awt.Button
+import kotlin.math.floor
+import kotlin.random.Random
 
 @Composable
 fun StreetView(
@@ -42,16 +45,19 @@ fun CombatView(
     viewModel: GameViewModel = viewModel { GameViewModel() }
 ) {
     var showSpecialMenu by remember { mutableStateOf(false) }
-    Column(modifier) {
-        FighterStats(viewModel.enemy)
-        Button(onClick = { viewModel.playerAttackMelee() }) {
-            Text("Melee")
-        }
-        Button(onClick = {}) {
-            Text("Magic")
-        }
-        Button(onClick = { showSpecialMenu = !showSpecialMenu }) {
-            Text("Special")
+    Column {
+        FlowRow(modifier) {
+            FighterStats(viewModel.enemy)
+            Button(onClick = { viewModel.playerAttackMelee() }) {
+                Text("Melee")
+            }
+            Button(onClick = {}) {
+                Text("Magic")
+            }
+            Button(onClick = { showSpecialMenu = !showSpecialMenu }) {
+                Text("Special")
+            }
+
         }
         AnimatedVisibility(showSpecialMenu) {
             Text("Special goes here")
@@ -72,6 +78,46 @@ fun FighterStats(
             LinearProgressIndicator(progress = { fighter.health.toFloat() / fighter.character.health })
         }
         additional()
+    }
+}
+
+@Composable
+fun ClimbView(
+    player: Fighter,
+    onSuccess: () -> Unit,
+    onFail: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var successChanceBonus by remember { mutableIntStateOf(0) }
+    var escapeChanceBonus by remember { mutableIntStateOf(0) }
+    Column(modifier) {
+        Button(onClick = {
+            val roll = Random.nextInt(
+                1,
+                20
+            ) + successChanceBonus + player.character.dexterity / 2
+            if (roll > 16) {
+                onSuccess()
+            } else {
+
+                successChanceBonus += Random.nextInt(2, 6)
+            }
+        }) {
+            Text("Keep going(${((4 + successChanceBonus + player.character.dexterity / 2) / 20f * 100f).toInt()}%)")
+        }
+        Button(onClick = {
+            if (Random.nextInt(
+                    1,
+                    20
+                ) + escapeChanceBonus + player.character.dexterity / 2 > 10
+            ) {
+                onFail()
+            } else {
+                escapeChanceBonus += Random.nextInt(0, 3)
+            }
+        }) {
+            Text("Turn back(${((10 + escapeChanceBonus + player.character.dexterity / 2) / 20f * 100f).toInt()}%)")
+        }
     }
 }
 
@@ -100,7 +146,13 @@ fun Game(
             when (state) {
                 GameState.WALKING -> StreetView(modifier = Modifier.align(Alignment.CenterHorizontally))
                 GameState.FIGHTING -> CombatView(modifier = Modifier.align(Alignment.CenterHorizontally))
-                GameState.CLIMBING -> TODO()
+                GameState.CLIMBING -> ClimbView(
+                    viewModel.player,
+                    onSuccess = { viewModel.winSkip() },
+                    onFail = { viewModel.looseSkip() },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
+
                 GameState.STEALING -> TODO()
                 GameState.CHOICE -> TODO()
                 GameState.VICTORY -> {
