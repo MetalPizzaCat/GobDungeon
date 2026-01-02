@@ -10,7 +10,9 @@ enum class Character(
     val charisma: Int,
     val defaultWeapon: Weapon,
     val chanceOfUsingSpells: Float,
-    val spells: List<Spell>
+    val spells: List<Spell>,
+    val chanceToDropLoot: Float,
+    val lootTable: List<LootDrop>
 ) {
     PLAYER(
         characterName = "You",
@@ -22,7 +24,9 @@ enum class Character(
         charisma = 5,
         defaultWeapon = Weapon.FIST,
         chanceOfUsingSpells = 0f,
-        spells = emptyList()
+        spells = emptyList(),
+        chanceToDropLoot = 0f,
+        lootTable = emptyList()
     ),
     BEE(
         characterName = "Swarm of evil bees",
@@ -36,7 +40,9 @@ enum class Character(
         chanceOfUsingSpells = 1.2f,
         spells = listOf(
             Spell.POISON_STINGER
-        )
+        ),
+        chanceToDropLoot = 0.3f,
+        lootTable = listOf(LootDrop(5, 20, listOf(Item.BOTTLE_OF_HONEY)))
     ),
     SUPER_BEE(
         characterName = "Swarm of magical super bees",
@@ -51,6 +57,8 @@ enum class Character(
         spells = listOf(
             Spell.POISON_STINGER,
             Spell.VOLLEY_OF_STINGS
-        )
+        ),
+        chanceToDropLoot = 1f,
+        lootTable = listOf(LootDrop(5, 20, listOf(Item.BOTTLE_OF_HONEY)))
     )
 }

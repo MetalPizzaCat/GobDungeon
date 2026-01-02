@@ -19,5 +19,6 @@ enum class Weapon(
      */
     FIST("Fist", damageBonusMin = 0, damageBonusMax = 1, attackMessageVerb = "hit"),
     STINGER("Stinger", damageBonusMin = 0, damageBonusMax = 1, attackMessageVerb = "stung"),
+    STINGER_BLADE("The string", damageBonusMin = 10, damageBonusMax = 20, attackMessageVerb = "stabbed"),
     DAGGER("Dagger", damageBonusMin = 2, damageBonusMax = 4, attackMessageVerb = "stabbed")
 }

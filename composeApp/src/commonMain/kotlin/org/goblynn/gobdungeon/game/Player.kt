@@ -38,6 +38,29 @@ class Player(onDamage: (info: String) -> Unit) : Fighter(Character.PLAYER, onDam
     }
 
     /**
+     * Use item
+     */
+    fun useItem(item: Item) {
+        if (item.weapon != null) {
+            currentWeapon = item.weapon
+            return
+        }
+        restoreHunger(item.hungerRestore)
+        receiveDamage(-item.healthRestore)
+        for ((e, d) in item.effect) {
+            addEffect(e, d)
+        }
+        when (item) {
+            Item.BOTTLE_OF_HONEY -> {
+                removeIllnessEffects()
+            }
+
+            else -> {}
+        }
+        removeItem(item)
+    }
+
+    /**
      * Calculate all logic related to advancing time, such as heal from food or damage from poison
      */
     fun passTime() {

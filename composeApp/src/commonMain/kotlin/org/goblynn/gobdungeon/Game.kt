@@ -32,7 +32,7 @@ fun StreetView(
     viewModel: GameViewModel = viewModel { GameViewModel() }
 ) {
     Column(modifier) {
-        Text(viewModel.currentDistance.toString())
+        Text(viewModel.game!!.currentDistance.toString())
         Button(onClick = { viewModel.makeStep() }) {
             Text("Move forward")
         }
@@ -45,22 +45,30 @@ fun CombatView(
     viewModel: GameViewModel = viewModel { GameViewModel() }
 ) {
     var showSpecialMenu by remember { mutableStateOf(false) }
-    Column {
-        FlowRow(modifier) {
-            FighterStats(viewModel.enemy)
-            Button(onClick = { viewModel.playerAttackMelee() }) {
-                Text("Melee")
-            }
-            Button(onClick = {}) {
-                Text("Magic")
-            }
-            Button(onClick = { showSpecialMenu = !showSpecialMenu }) {
-                Text("Special")
-            }
+    AnimatedContent(viewModel.game!!.playerIsStunned) { state ->
+        if (!state) {
+            Column {
+                FlowRow(modifier) {
+                    FighterStats(viewModel.game!!.enemy)
+                    Button(onClick = { viewModel.playerAttackMelee() }) {
+                        Text("Melee")
+                    }
+                    Button(onClick = {}) {
+                        Text("Magic")
+                    }
+                    Button(onClick = { showSpecialMenu = !showSpecialMenu }) {
+                        Text("Special")
+                    }
 
-        }
-        AnimatedVisibility(showSpecialMenu) {
-            Text("Special goes here")
+                }
+                AnimatedVisibility(showSpecialMenu) {
+                    Text("Special goes here")
+                }
+            }
+        } else {
+            Button(onClick = { viewModel.skipTurn() }) {
+                Text("Stunned!")
+            }
         }
     }
 }
@@ -130,76 +138,78 @@ fun Game(
     var showLongerLog by remember { mutableStateOf(false) }
     var showInventory by remember { mutableStateOf(false) }
     Column(modifier.fillMaxWidth()) {
-        FighterStats(
-            viewModel.player,
-            Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
-        ) {
-            Row {
-                Text("Hunger")
-                LinearProgressIndicator(progress = { viewModel.player.hunger / 100f })
+        viewModel.game?.let { game ->
+            FighterStats(
+                game.player,
+                Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+            ) {
+                Row {
+                    Text("Hunger")
+                    LinearProgressIndicator(progress = { game.player.hunger / 100f })
+                }
             }
-        }
-        AnimatedContent(
-            targetState = viewModel.currentState,
-            label = "Action"
-        ) { state ->
-            when (state) {
-                GameState.WALKING -> StreetView(modifier = Modifier.align(Alignment.CenterHorizontally))
-                GameState.FIGHTING -> CombatView(modifier = Modifier.align(Alignment.CenterHorizontally))
-                GameState.CLIMBING -> ClimbView(
-                    viewModel.player,
-                    onSuccess = { viewModel.winSkip() },
-                    onFail = { viewModel.looseSkip() },
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                )
+            AnimatedContent(
+                targetState = game.currentState,
+                label = "Action"
+            ) { state ->
+                when (state) {
+                    GameState.WALKING -> StreetView(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    GameState.FIGHTING -> CombatView(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    GameState.CLIMBING -> ClimbView(
+                        game.player,
+                        onSuccess = { viewModel.winSkip() },
+                        onFail = { viewModel.looseSkip() },
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
 
-                GameState.STEALING -> TODO()
-                GameState.CHOICE -> TODO()
-                GameState.VICTORY -> {
-                    Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                        Text("You won!")
-                        Button(onClick = { viewModel.acceptVictory() }) {
-                            Text("Continue")
+                    GameState.STEALING -> TODO()
+                    GameState.CHOICE -> TODO()
+                    GameState.VICTORY -> {
+                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                            Text("You won!")
+                            Button(onClick = { viewModel.acceptVictory() }) {
+                                Text("Continue")
+                            }
+                        }
+                    }
+
+                    GameState.DEFEAT -> TODO()
+                }
+            }
+            Button(onClick = { showInventory = !showInventory }) {
+                Text("Inventory")
+            }
+            AnimatedVisibility(showInventory) {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    game.player.inventory.forEach {
+                        Button(onClick = {}) {
+                            Text(it.displayName)
                         }
                     }
                 }
-
-                GameState.DEFEAT -> TODO()
             }
-        }
-        Button(onClick = { showInventory = !showInventory }) {
-            Text("Inventory")
-        }
-        AnimatedVisibility(showInventory) {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                viewModel.player.inventory.forEach {
-                    Button(onClick = {}) {
-                        Text(it.displayName)
+            Text(
+                "Log:",
+                Modifier.fillMaxWidth().align(Alignment.CenterHorizontally).combinedClickable(
+                    onClick = { showLog = !showLog },
+                    onLongClick = { showLog = true; showLongerLog = !showLongerLog }
+                ),
+            )
+            AnimatedVisibility(showLog) {
+                Column(
+                    Modifier.fillMaxWidth().align(Alignment.CenterHorizontally).verticalScroll(
+                        rememberScrollState()
+                    )
+                ) {
+                    viewModel.game?.actionLog?.takeLast(
+                        if (showLongerLog) {
+                            50
+                        } else {
+                            10
+                        }
+                    )?.forEach { msg ->
+                        Text(msg)
                     }
-                }
-            }
-        }
-        Text(
-            "Log:",
-            Modifier.fillMaxWidth().align(Alignment.CenterHorizontally).combinedClickable(
-                onClick = { showLog = !showLog },
-                onLongClick = { showLog = true; showLongerLog = !showLongerLog }
-            ),
-        )
-        AnimatedVisibility(showLog) {
-            Column(
-                Modifier.fillMaxWidth().align(Alignment.CenterHorizontally).verticalScroll(
-                    rememberScrollState()
-                )
-            ) {
-                viewModel.actionLog.takeLast(
-                    if (showLongerLog) {
-                        50
-                    } else {
-                        10
-                    }
-                ).forEach { msg ->
-                    Text(msg)
                 }
             }
         }

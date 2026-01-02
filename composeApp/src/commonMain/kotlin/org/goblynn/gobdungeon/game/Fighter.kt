@@ -68,6 +68,11 @@ open class Fighter(val character: Character, val onDamage: (info: String) -> Uni
         }
     }
 
+
+    fun removeIllnessEffects() {
+        effects.remove(Effect.POISON)
+    }
+
     /**
      * Apple effects and decrease their timers
      */
