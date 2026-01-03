@@ -5,16 +5,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlin.collections.plusAssign
 import kotlin.random.Random
-import kotlin.text.get
-import kotlin.text.toInt
-import kotlin.times
 
 /**
  * Class responsible for handling
  */
-class GameManager(level: Levels) {
+class GameManager(level: Levels, val onPlayerDied: () -> Unit) {
     var currentMovementSpeed by mutableIntStateOf(1)
         private set
 
@@ -53,7 +49,12 @@ class GameManager(level: Levels) {
     )
         private set
 
-    var player by mutableStateOf(Player(onDamage = { displayFighterMessage(it) }))
+    var player by mutableStateOf(
+        Player(
+            onDamage = { displayFighterMessage(it) },
+            level.startingItems
+        )
+    )
         private set
 
     /**
@@ -125,7 +126,7 @@ class GameManager(level: Levels) {
 
     fun endTurn() {
         enemy.advanceEffects()
-        if (enemy.dead) {
+        if (enemy.isDead) {
             log("Defeated ${enemy.character.characterName}")
             currentState = GameState.VICTORY
             currentLootDrop = if (Random.nextFloat() < enemy.character.chanceToDropLoot) {
@@ -136,6 +137,10 @@ class GameManager(level: Levels) {
             return
         }
         runEnemyLogic()
+        if (player.isDead) {
+            onPlayerDied()
+            return
+        }
         player.advanceEffects()
         playerIsStunned = player.isStunned
     }

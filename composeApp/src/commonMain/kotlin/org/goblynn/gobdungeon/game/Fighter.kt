@@ -14,7 +14,11 @@ import kotlin.random.Random
  * @param character base character data for the fighter
  * @param onDamage callback function that can be used to add text to action log
  */
-open class Fighter(val character: Character, val onDamage: (info: String) -> Unit) {
+open class Fighter(
+    val character: Character,
+    val onDamage: (info: String) -> Unit,
+    startingInventory: List<Item> = emptyList()
+) {
     var health by mutableIntStateOf(character.health)
         protected set
 
@@ -24,12 +28,12 @@ open class Fighter(val character: Character, val onDamage: (info: String) -> Uni
     var arcana by mutableIntStateOf(character.arcana)
         protected set
 
-    val dead: Boolean
+    val isDead: Boolean
         get() = health <= 0
 
     var currentWeapon by mutableStateOf(character.defaultWeapon)
 
-    val inventory = mutableStateListOf<Item>()
+    val inventory = mutableStateListOf<Item>(*startingInventory.toTypedArray())
 
     val effects = mutableStateMapOf<Effect, Int>()
 

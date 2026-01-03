@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,10 +22,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.goblynn.gobdungeon.game.Fighter
 import org.goblynn.gobdungeon.game.GameState
-import kotlin.math.floor
 import kotlin.random.Random
 
 @Composable
@@ -32,7 +34,6 @@ fun StreetView(
     viewModel: GameViewModel = viewModel { GameViewModel() }
 ) {
     Column(modifier) {
-        Text(viewModel.game!!.currentDistance.toString())
         Button(onClick = { viewModel.makeStep() }) {
             Text("Move forward")
         }
@@ -48,8 +49,9 @@ fun CombatView(
     AnimatedContent(viewModel.game!!.playerIsStunned) { state ->
         if (!state) {
             Column {
+                FighterStats(viewModel.game!!.enemy)
                 FlowRow(modifier) {
-                    FighterStats(viewModel.game!!.enemy)
+
                     Button(onClick = { viewModel.playerAttackMelee() }) {
                         Text("Melee")
                     }
@@ -79,13 +81,15 @@ fun FighterStats(
     modifier: Modifier = Modifier,
     additional: @Composable () -> Unit = {}
 ) {
-    Column(modifier) {
-        Text(fighter.character.characterName)
-        Row {
-            Text("Health")
-            LinearProgressIndicator(progress = { fighter.health.toFloat() / fighter.character.health })
+    ElevatedCard(modifier.padding(5.dp)) {
+        Column(Modifier.padding(5.dp)) {
+            Text(fighter.character.characterName)
+            Row {
+                Text("Health")
+                LinearProgressIndicator(progress = { fighter.health.toFloat() / fighter.character.health })
+            }
+            additional()
         }
-        additional()
     }
 }
 
@@ -136,18 +140,27 @@ fun Game(
 ) {
     var showLog by remember { mutableStateOf(true) }
     var showLongerLog by remember { mutableStateOf(false) }
-    var showInventory by remember { mutableStateOf(false) }
-    Column(modifier.fillMaxWidth()) {
+    Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         viewModel.game?.let { game ->
+
             FighterStats(
                 game.player,
-                Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                Modifier.fillMaxWidth(),
             ) {
                 Row {
                     Text("Hunger")
                     LinearProgressIndicator(progress = { game.player.hunger / 100f })
                 }
+                Row(Modifier.fillMaxWidth()) {
+                    Text("Distance", Modifier.weight(0.1f))
+                    LinearProgressIndicator(
+                        progress = { game.currentDistance.toFloat() / game.targetDistance },
+                        Modifier.weight(0.2f)
+                    )
+                    Text("${game.currentDistance} / ${game.targetDistance}m", Modifier.weight(0.1f))
+                }
             }
+
             AnimatedContent(
                 targetState = game.currentState,
                 label = "Action"
@@ -173,21 +186,9 @@ fun Game(
                         }
                     }
 
-                    GameState.DEFEAT -> TODO()
                 }
             }
-            Button(onClick = { showInventory = !showInventory }) {
-                Text("Inventory")
-            }
-            AnimatedVisibility(showInventory) {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
-                    game.player.inventory.forEach {
-                        Button(onClick = {}) {
-                            Text(it.displayName)
-                        }
-                    }
-                }
-            }
+            Inventory(game.player.inventory, onItemUse = { viewModel.useItem(it) })
             Text(
                 "Log:",
                 Modifier.fillMaxWidth().align(Alignment.CenterHorizontally).combinedClickable(

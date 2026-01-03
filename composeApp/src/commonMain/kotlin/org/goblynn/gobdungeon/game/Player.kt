@@ -6,7 +6,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
 import kotlin.random.Random
 
-class Player(onDamage: (info: String) -> Unit) : Fighter(Character.PLAYER, onDamage) {
+class Player(onDamage: (info: String) -> Unit, startingInventory: List<Item>) :
+    Fighter(Character.PLAYER, onDamage, startingInventory) {
     /**
      * Property describing how full player is. If above 0 player will slowly heal
      */
@@ -64,7 +65,7 @@ class Player(onDamage: (info: String) -> Unit) : Fighter(Character.PLAYER, onDam
      * Calculate all logic related to advancing time, such as heal from food or damage from poison
      */
     fun passTime() {
-        if (health < character.health && !dead) {
+        if (health < character.health && !isDead) {
             if (hunger > 0) {
                 hunger = (hunger - Random.nextInt(1, 4)).coerceAtLeast(0)
                 receiveDamage(-Random.nextInt(1, 3))

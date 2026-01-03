@@ -4,18 +4,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import org.goblynn.gobdungeon.game.Character
-import org.goblynn.gobdungeon.game.Fighter
+import org.goblynn.gobdungeon.game.EndGameStats
 import org.goblynn.gobdungeon.game.GameManager
 import org.goblynn.gobdungeon.game.GameState
 import org.goblynn.gobdungeon.game.Item
 import org.goblynn.gobdungeon.game.Levels
-import org.goblynn.gobdungeon.game.Player
-import kotlin.random.Random
 
 class GameViewModel : ViewModel() {
 
     var game by mutableStateOf<GameManager?>(null)
+        private set
+
+    var endGameStats by mutableStateOf<EndGameStats?>(null)
         private set
 
 
@@ -24,7 +24,14 @@ class GameViewModel : ViewModel() {
      * @param level level to enter
      */
     fun enterLevel(level: Levels) {
-        game = GameManager(level)
+        game = GameManager(level, onPlayerDied = { playerDied() })
+    }
+
+    fun playerDied() {
+        if (game != null) {
+            endGameStats = EndGameStats(game!!.currentDistance, game!!.currentStage)
+            game = null
+        }
     }
 
     fun playerAttackMelee() {
@@ -39,6 +46,10 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    fun acceptEndGameMenu() {
+        endGameStats = null
+    }
+
 
     /**
      * Use item as player. If item is weapon every stat is ignored
@@ -48,7 +59,7 @@ class GameViewModel : ViewModel() {
     }
 
     fun acceptVictory() {
-       game?.endCombat()
+        game?.endCombat()
     }
 
     fun winSkip() {
