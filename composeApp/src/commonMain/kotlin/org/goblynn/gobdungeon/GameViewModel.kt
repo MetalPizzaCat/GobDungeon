@@ -52,10 +52,33 @@ class GameViewModel : ViewModel() {
 
 
     /**
+     * Try to buy a given item at a given price
+     * @param item item to buy
+     * @param price price to buy at
+     * @return True if player has enough money and game is active, false otherwise
+     */
+    fun tryBuyItem(item: Item, price: Int): Boolean {
+        val player = game?.player ?: return false
+        if (player.gold < price) {
+            return false
+        }
+        player.addItem(item)
+        player.spendGold(price)
+        game?.removeShoppingOption(item, price)
+        return true
+    }
+
+    fun stopShopping() {
+        game?.stopShopping()
+    }
+
+    /**
      * Use item as player. If item is weapon every stat is ignored
      */
     fun useItem(item: Item) {
-        game?.player?.useItem(item)
+        if (game?.canUseItems ?: false) {
+            game?.player?.useItem(item)
+        }
     }
 
     fun acceptVictory() {
@@ -75,7 +98,11 @@ class GameViewModel : ViewModel() {
         game?.let { game ->
             game.advanceDistance(game.currentMovementSpeed)
             game.player.passTime()
-            game.executeRandomEvents()
+            if (game.hasReachedTheEnd) {
+                game.beginBossBattle()
+            } else {
+                game.executeRandomEvents()
+            }
         }
     }
 

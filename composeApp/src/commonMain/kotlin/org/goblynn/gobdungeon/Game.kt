@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.goblynn.gobdungeon.game.Fighter
 import org.goblynn.gobdungeon.game.GameState
@@ -49,6 +51,9 @@ fun CombatView(
     AnimatedContent(viewModel.game!!.playerIsStunned) { state ->
         if (!state) {
             Column {
+                if (viewModel.game!!.facingBoss) {
+                    Text("Boss fight!")
+                }
                 FighterStats(viewModel.game!!.enemy)
                 FlowRow(modifier) {
 
@@ -79,7 +84,7 @@ fun CombatView(
 fun FighterStats(
     fighter: Fighter,
     modifier: Modifier = Modifier,
-    additional: @Composable () -> Unit = {}
+    additional: @Composable (ColumnScope.() -> Unit) = {}
 ) {
     ElevatedCard(modifier.padding(5.dp)) {
         Column(Modifier.padding(5.dp)) {
@@ -159,6 +164,10 @@ fun Game(
                     )
                     Text("${game.currentDistance} / ${game.targetDistance}m", Modifier.weight(0.1f))
                 }
+                Text(
+                    "Gold: ${game.player.gold}",
+                    modifier = Modifier.padding(5.dp)
+                )
             }
 
             AnimatedContent(
@@ -186,9 +195,15 @@ fun Game(
                         }
                     }
 
+                    GameState.SHOPPING -> ShopMenu(
+                        game.shoppingOptions,
+                        onItemPurchased = { item, price -> viewModel.tryBuyItem(item, price) },
+                        onFinished = { viewModel.stopShopping() })
                 }
             }
-            Inventory(game.player.inventory, onItemUse = { viewModel.useItem(it) })
+            Inventory(
+                game.player.inventory,
+                onItemUse = { viewModel.useItem(it) })
             Text(
                 "Log:",
                 Modifier.fillMaxWidth().align(Alignment.CenterHorizontally).combinedClickable(

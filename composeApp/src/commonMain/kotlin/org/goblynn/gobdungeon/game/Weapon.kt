@@ -20,5 +20,8 @@ enum class Weapon(
     FIST("Fist", damageBonusMin = 0, damageBonusMax = 1, attackMessageVerb = "hit"),
     STINGER("Stinger", damageBonusMin = 0, damageBonusMax = 1, attackMessageVerb = "stung"),
     STINGER_BLADE("The string", damageBonusMin = 10, damageBonusMax = 20, attackMessageVerb = "stabbed"),
+    SHORTSWORD("Shortsword", damageBonusMin = 5, damageBonusMax = 15, attackMessageVerb = "hit"),
+    GREATSWORD("Greatsword", damageBonusMin = 10, damageBonusMax = 30, attackMessageVerb = "hit"),
+    BATTLEAXE("Battleaxe", damageBonusMin = 7, damageBonusMax = 18, attackMessageVerb = "stabbed"),
     DAGGER("Dagger", damageBonusMin = 2, damageBonusMax = 4, attackMessageVerb = "stabbed")
 }

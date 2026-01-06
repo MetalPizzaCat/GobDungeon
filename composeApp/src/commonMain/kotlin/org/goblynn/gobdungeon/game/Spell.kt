@@ -13,7 +13,7 @@ enum class Spell(
         effects = mapOf(Effect.POISON to 1)
     ),
     VOLLEY_OF_STINGS(
-        "Volley of sings",
+        "Volley of stings",
         cost = 4,
         bonusDamage = 10,
         effects = mapOf(Effect.POISON to 3)

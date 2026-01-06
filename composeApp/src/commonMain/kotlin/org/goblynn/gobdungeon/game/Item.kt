@@ -28,6 +28,38 @@ enum class Item(
         weapon = null,
         effect = emptyMap()
     ),
+    BIG_RATION(
+        displayName = "Big ration",
+        description = "Basic ration to restore some hunger",
+        healthRestore = 10,
+        hungerRestore = 80,
+        weapon = null,
+        effect = emptyMap()
+    ),
+    HEALTH_POTION(
+        displayName = "Health potion",
+        description = "Cures some minor wounds",
+        healthRestore = 25,
+        hungerRestore = 0,
+        weapon = null,
+        effect = emptyMap()
+    ),
+    GREATER_HEALTH_POTION(
+        displayName = "Greater Health potion",
+        description = "Basic ration to restore some hunger",
+        healthRestore = 60,
+        hungerRestore = 0,
+        weapon = null,
+        effect = emptyMap()
+    ),
+    MEGA_HEALTH_POTION(
+        displayName = "Super Health potion",
+        description = "Fully heals you",
+        healthRestore = 100,
+        hungerRestore = 0,
+        weapon = null,
+        effect = emptyMap()
+    ),
     BOTTLE_OF_HONEY(
         displayName = "Bottle of honey",
         description = "Helps with hunger and illnesses",
@@ -42,6 +74,30 @@ enum class Item(
         healthRestore = 0,
         hungerRestore = 0,
         weapon = Weapon.DAGGER,
+        effect = emptyMap()
+    ),
+    SHORTSWORD(
+        displayName = "Shortsword",
+        description = "A decent blade",
+        healthRestore = 0,
+        hungerRestore = 0,
+        weapon = Weapon.SHORTSWORD,
+        effect = emptyMap()
+    ),
+    GREATSWORD(
+        displayName = "Greatsword",
+        description = "A big sword for killing things",
+        healthRestore = 0,
+        hungerRestore = 0,
+        weapon = Weapon.GREATSWORD,
+        effect = emptyMap()
+    ),
+    BATTLEAXE(
+        displayName = "Battleaxe",
+        description = "A big sword for killing things",
+        healthRestore = 0,
+        hungerRestore = 0,
+        weapon = Weapon.BATTLEAXE,
         effect = emptyMap()
     ),
     STING_BLADE(

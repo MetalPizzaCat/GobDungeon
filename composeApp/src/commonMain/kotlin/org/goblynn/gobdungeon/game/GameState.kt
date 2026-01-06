@@ -7,4 +7,5 @@ enum class GameState {
     STEALING,
     CHOICE,
     VICTORY,
+    SHOPPING,
 }

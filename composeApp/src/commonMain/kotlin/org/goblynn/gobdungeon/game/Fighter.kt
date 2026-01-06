@@ -57,6 +57,10 @@ open class Fighter(
         inventory.remove(item)
     }
 
+    fun addItem(item: Item) {
+        inventory.add(item)
+    }
+
     fun useArcana(amount: Int) {
         arcana = (arcana - amount).coerceAtLeast(0)
     }

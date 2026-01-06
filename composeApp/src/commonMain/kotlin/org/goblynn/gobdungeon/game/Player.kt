@@ -14,6 +14,9 @@ class Player(onDamage: (info: String) -> Unit, startingInventory: List<Item>) :
     var hunger by mutableIntStateOf(100)
         private set
 
+    var gold by mutableIntStateOf(100)
+        private set
+
     /**
      * Equivalent to long rest in Baldur's gate 3. Restore health and similar stats to full
      */
@@ -24,6 +27,10 @@ class Player(onDamage: (info: String) -> Unit, startingInventory: List<Item>) :
 
     fun restoreHunger(amount: Int) {
         hunger = (hunger + amount).coerceAtMost(100)
+    }
+
+    fun spendGold(amount: Int) {
+        gold = (gold - amount).coerceAtLeast(0)
     }
 
     val spells = mutableStateListOf<Spell>()

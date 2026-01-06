@@ -3,6 +3,7 @@ package org.goblynn.gobdungeon.game
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlin.random.Random
@@ -23,6 +24,11 @@ class GameManager(level: Levels, val onPlayerDied: () -> Unit) {
     var playerIsStunned by mutableStateOf(false)
         private set
 
+    val shoppingOptions = mutableStateMapOf<Item, Int>()
+
+    val canUseItems: Boolean
+        get() = currentState == GameState.WALKING || currentState == GameState.FIGHTING
+
     /**
      * Current stage of the level. Depending on how high the value is different events might occur
      */
@@ -37,6 +43,9 @@ class GameManager(level: Levels, val onPlayerDied: () -> Unit) {
      */
     var targetDistance by mutableIntStateOf(level.distance)
         private set
+
+    val hasReachedTheEnd: Boolean
+        get() = currentDistance >= targetDistance
 
     /**
      * Current state of the game
@@ -62,8 +71,34 @@ class GameManager(level: Levels, val onPlayerDied: () -> Unit) {
      */
     val actionLog = mutableStateListOf<String>()
 
-    var facingBoss: Boolean = false
+    var facingBoss by mutableStateOf(false)
         private set
+
+    fun beginShopping() {
+        if (currentState != GameState.WALKING || currentLevel.shopOptions.isEmpty()) {
+            return
+        }
+        shoppingOptions.clear()
+        val itemCount = Random.nextInt(1, currentLevel.shopOptions.size)
+        for (i in 0..<itemCount) {
+            val opt = currentLevel.shopOptions.random()
+            shoppingOptions[opt.item] = Random.nextInt(opt.minPrice, opt.maxPrice)
+        }
+        currentState = GameState.SHOPPING
+    }
+
+    fun stopShopping() {
+        currentState = GameState.WALKING
+    }
+
+    /**
+     * Remove shopping option for this item with given price
+     * @param item item
+     * @param price specific price of the item
+     */
+    fun removeShoppingOption(item: Item, price: Int) {
+        shoppingOptions.remove(item)
+    }
 
     /**
      * Roll the die on applying a spell
@@ -154,16 +189,30 @@ class GameManager(level: Levels, val onPlayerDied: () -> Unit) {
         }
     }
 
+    /**
+     * Execute random event that could occur while player is walking around
+     */
     fun executeRandomEvents() {
         if (Random.nextFloat() <= currentLevel.chanceOfEnemy) {
             startCombat(currentLevel.enemies.random())
         } else if (Random.nextFloat() <= currentLevel.chanceOfSkip) {
             currentState = GameState.CLIMBING
+        } else if (Random.nextFloat() <= currentLevel.chanceOfShop) {
+            beginShopping()
         } else if (Random.nextFloat() <= 0.1f) {
             val item = currentLevel.findableItems.random()
             player.inventory.add(item)
             log("Found ${item.displayName}")
         }
+    }
+
+    /**
+     * Begin the boss battle that occurs at the end of the level
+     */
+    fun beginBossBattle() {
+        startCombat(currentLevel.endBosses[currentStage])
+        facingBoss = true
+
     }
 
     fun advanceToNextStage() {
@@ -184,9 +233,6 @@ class GameManager(level: Levels, val onPlayerDied: () -> Unit) {
     fun advanceDistance(value: Int) {
         currentDistance = (currentDistance + value).coerceAtMost(targetDistance)
         log("Moved by ${currentMovementSpeed}m")
-        if (currentDistance == targetDistance) {
-            startCombat(currentLevel.enemies[currentStage])
-            facingBoss = true
-        }
+
     }
 }
